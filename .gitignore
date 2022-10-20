@@ -1,0 +1,11 @@
+__pycache__/
+lib/pywidevine/cdm/devices/
+downloader.py
+lib/pywidevine/cdm/cdm.py
+lib/pywidevine/cdm/deviceconfig.py
+lib/pywidevine/cdm/key.py
+lib/pywidevine/cdm/session.py
+lib/pywidevine/cdm/vmp.pyf
+test/tmp/
+test/output/
+test/
