@@ -1,28 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<!--<div class="d-inline-block"></div>-->
-<!--<div id="accordion">-->
-    <style>
-        .row>div { padding-top: 3px; padding-bottom:3px; }
-        .row { align-items: center; word-break:break-all;}
-        .row>div:nth-child(odd) { align-items: right; text-align: right; }
-        .row>div:nth-child(even) { align-items: left; text-align: left; }
-      </style>
 
 <table id="result_table" class="table table-sm  tableRowHover">
   <thead>
     <tr>
-      <th style="width:5%">IDX</th>
-      <th style="width:8%">Plugin</th>
-      <th style="width:10%">시작시간</th>
-      <th style="width:20%">파일명</th>
-      <th style="width:8%">상태</th>
-      <th style="width:15%">진행률</th>
-      <th style="width:5%">길이</th>
-      <th style="width:5%">PF</th>
-      <th style="width:8%">배속</th>
-      <th style="width:8%">진행시간</th>
-      <th style="width:8%">Action</th>
+      <th style="width:5%; text-align:center;">IDX</th>
+      <th style="width:10%; text-align:center;">Plugin</th>
+      <th style="width:15%; text-align:center;">시작시간</th>
+      <th style="width:30%; text-align:center;">파일명</th>
+      <th style="width:20%; text-align:center;">상태</th>
+      <th style="width:10%; text-align:center;">진행시간</th>
+      <th style="width:10%; text-align:center;">Action</th>
     </tr>
   </thead>
   <tbody id="list" >
@@ -44,227 +32,122 @@ $(document).ready(function(){
   });
 
   socket.on('add', function(data){
-    str = make_item(data)
-    $("#list").html(str);
+    console.log('111111111111111')
+    console.log(current_data)
+    console.log('22222222222222222')
+    str = make_item(data);
+    if (current_data == null || current_data.length == 0) {
+      current_data = Array();
+      $("#list").html(str);
+    } else {
+      $("#list").html($("#list").html() + str);
+    }
+    current_data.push(data);
   });
 
-  socket.on('status_change', function(data) {
-    button_html(data);
+  socket.on('refresh', function(data) {
+    refresh_item(data);
   });
 
-  socket.on('status', function(data){
-    status_html(data);
-  });
-
-  socket.on('last', function(data){
-    status_html(data);
-    button_html(data);
-  });
 
   globalSendCommand('list', null, null, null, null, function(data) {
     $("#list").html('');
-    console.log(data)
+    //console.log(data)
+    current_data = data;
     if (data.length == 0) {
       str = "<tr><td colspan='10'><h4>작업이 없습니다.</h4><td><tr>";
     } else {
       str = ''
       for(i in data) {
-        str += make_item(data[i])
+        str += make_item(data[i]);
       }
     }
     $("#list").html(str);
   });
-
-
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-$("body").on('click', '#stop', function(e){
+$("body").on('click', '#stop_btn', function(e){
   e.stopPropagation();
   e.preventDefault();
-  var idx = $(this).data('idx')
-  $.ajax({
-    url: '/ffmpeg/ajax/stop',
-    type: "POST",
-    cache: false,
-    data:{ idx : idx},
-    dataType: "json",
-    success: function (data) {
-    }
-  });
-});
-
-$("body").on('click', '#play', function(e){
-  e.preventDefault();
-  e.stopPropagation();
-  var idx = $(this).data('idx')
-  $.ajax({
-    url: '/ffmpeg/ajax/play',
-    type: "POST",
-    cache: false,
-    data:{ idx : idx},
-    dataType: "json",
-    success: function (data) {
-      console.log(data);
-      if (data.startsWith('/')) {
-        var url = '/open_file' + data;
-      } else {
-        var url = '/open_file/' + data;
-      }
-      window.open(url, "_blank");
-    }
+  globalSendCommand('stop', $(this).data('idx'), null, null, null, function(ret){
+    refresh_item(ret.data);
   });
 });
 
 
+function refresh_item(data) {
+  $('#tr1_'+data.idx).html(make_item1(data));
+  $('#collapse_'+data.idx).html(make_item2(data));
+}
 
 function make_item(data) {
   console.log(data);
-  //if (document.getElementById("log_"+data.idx) != null) return;
-  str = '<tr style="cursor: pointer;" data-toggle="collapse" data-target="#collapse_'+ data.idx + '" aria-expanded="true" >';
-  str += '<td scope="col" style="width:5%">'+ data.idx + '</td>';
-  str += '<td scope="col" style="width:8%">'+ data.callback_id + '</td>';
-  str += '<td scope="col" style="width:10%">'+ data.start_time + '</td>';
-  str += '<td scope="col" style="width:20%">'+ data.filename + '</td>';
-  str += '<td id="status_'+data.idx+'" scope="col" style="width:8%">'+ data.status_kor + '</td>';
+  str = '<tr id="tr1_'+data.idx+'" style="cursor: pointer;" data-toggle="collapse" data-target="#collapse_'+ data.idx + '" aria-expanded="true" >';
+  str += make_item1(data);
+  str += '</tr>';
+  str += '<tr id="collapse_' + data.idx + '" class="collapse tableRowHoverOff" style="cursor: pointer;">';
+  str += make_item2(data);
+  str += '</tr>';
+  return str;
+}
+
+function make_item1(data) {
+  str = '<td scope="col" style="width:5%; text-align:center;">'+ data.idx + '</td>';
+  str += '<td scope="col" style="width:10%; text-align:center;">'+ data.callback_id + '</td>';
+  str += '<td scope="col" style="width:10%; text-align:center;">'+ data.start_time + '</td>';
+  str += '<td scope="col" style="width:20%; text-align:center;">'+ data.output_filename + '</td>';
+
+  if (data.status == 'EXIST_OUTPUT_FILEPATH') tmp = "이미 파일이 있음.";
+  else if (data.status == 'DOWNLOADING') tmp = "다운로드중";
+  else if (data.status == 'COMPLETED') tmp = "다운로드 완료";
+  else if (data.status == 'USER_STOP') tmp = "사용자 중지";
+  else tmp = data.status;
+
+  str += '<td id="status_'+data.idx+'" scope="col" style="width:15%; text-align:center;">'+ tmp + '</td>';
   var visi = 'hidden';
   if (parseInt(data.percent) > 0) {
     visi = 'visible';
   }
-  str += '<td scope="col" style="width:20%"><div class="progress"><div id="progress_'+data.idx+'" class="progress-bar" style="visibility: '+visi+'; width:'+data.percent+'%">'+data.percent +'%</div></div></td>';
-  str += '<td scope="col" style="width:5%">'+ data.duration_str + '</td>';
-  str += '<td id="current_pf_count_'+data.idx+'" scope="col" style="width:5%">'+ data.current_pf_count + '</td>';
-  str += '<td id="current_speed_'+data.idx+'" scope="col" style="width:8%">'+ data.current_speed + '</td>';
-  str += '<td id="download_time_'+data.idx+'" scope="col" style="width:8%">'+ data.download_time + '</td>';
-  str += '<td id="button_'+data.idx+'" scope="col" style="width:8%" class="tableRowHoverOff">';
-  if (data.status_str == 'DOWNLOADING') {
-    str += '<button id="stop" class="align-middle btn btn-outline-danger btn-sm" data-idx="'+data.idx+'">중지</button>';
-  } else if (data.status_str == 'COMPLETED' && data.exist) {
-    str += '<button id="play" class="align-middle btn btn-outline-info btn-sm" data-idx="'+data.idx+'">재생</button>';
-  } 
+  str += '<td id="download_time_'+data.idx+'" scope="col" style="width:10%; text-align:center;">'+ data.download_time + '</td>';
+  str += '<td id="button_'+data.idx+'" scope="col" style="width:10%; text-align:center;">';
+  if (data.status == 'DOWNLOADING') {
+    str += j_button('stop_btn', '중지', {'idx':data.idx}, 'danger', false, true);
+  }
   str += '</td>'
-  str += '</tr>'
-  str += '<tr class="collapse tableRowHoverOff" style="cursor: pointer;"  id="collapse_' + data.idx + '">';
-  str += '<td colspan="11">';
+  return str;
+}
+
+function make_item2(data) {
+  str = '<td colspan="11">';
   str += '<div id="detail_'+data.idx+'">';
   str += get_detail(data);
   str += '</div>';
-  /*
-  str += '<div><textarea class="form-control" id="log_'+data.idx+'" rows="20">';
-  for (var i = 0; i < data.log.length; i++) {
-    str += data.log[i] + '\n';
-  }
-  str += '</textarea></div>';
-  */
   str += '</td>';   
-  str += '</tr>'
-  return str
-}
-
-function info_html($left, $right) {
-  var str = '<div class="row">' +
-      '<div class="col-sm-2">' + 
-      '<strong>'+ $left +'</strong>' + 
-      '</div>' + 
-      '<div class="col-sm-10">' + 
-      '<div class="input-group col-sm-9">' +
-      '<span class="text-left" style="padding-left:10px; padding-top:3px">';
-  if ($left == 'URL') {
-    str += '<a href="/hls?url=' + $right + '" target="_blank">';
-  }
-  str += $right;
-  if ($left == 'URL') {
-    str += '</a>';
-  }    
-  str += '</span>' + 
-      '</div>' + 
-      '</div>' + 
-      '</div>';
   return str;
 }
+
 
 function get_detail(data) {
-  var str = info_html('URL', data.url);
-  str += info_html('임시경로', data.temp_fullpath);
-  str += info_html('저장경로', data.save_fullpath);
-  str += info_html('진행률(current/total)', data.percent+ '% (' + data.current_duration + ' / ' + data.duration + ')');
-  str += info_html('현재 비트레이트', data.current_bitrate);
-  str += info_html('종료시간', data.end_time);
-  str += info_html('허용 Packet Fail 수', data.max_pf_count);    
-  str += info_html('파일 Exist', data.exist);
-  if (data.status_str == 'COMPLETED') {
-    str += info_html('파일 크기', data.filesize_str);
-    str += info_html('다운 속도', data.download_speed);
-  }
+  var str = "";
+  str += j_row_info('MPD URL', data.mpd_url);
+  str += j_row_info('MPD Headers', '<pre style="white-space: pre-wrap;">' +JSON.stringify(data.mpd_headers, null, 2) + '</pre>');
+
+  str += j_row_info('License URL', data.license_url);
+  str += j_row_info('License Headers', '<pre style="white-space: pre-wrap;">' +JSON.stringify(data.license_headers, null, 2) + '</pre>');
+  str += j_row_info('저장 폴더', data.output_dir);
   return str;
 }
 
-function button_html(data) {
-  if (data.status_str == 'DOWNLOADING') {
-    document.getElementById("button_" + data.idx).innerHTML = 
-    '<button id="stop" class="align-middle btn btn-outline-danger btn-sm" data-idx="'+data.idx+'">중지</button>';
-  } else if (data.status_str == 'COMPLETED' && data.exist) {
-    document.getElementById("button_" + data.idx).innerHTML = '<button id="play" class="align-middle btn btn-outline-info btn-sm" data-idx="'+data.idx+'">재생</button>';
-  } else {
-    document.getElementById("button_" + data.idx).innerHTML = '';
-  }
-}
 
-function status_html(data) {
-  var progress = document.getElementById("progress_" + data.idx);
-  progress.style.width = data.percent+ '%';
-  progress.innerHTML = data.percent+ '%';
-  progress.style.visibility = 'visible';
-  document.getElementById("status_" + data.idx).innerHTML = data.status_kor;
-  document.getElementById("current_pf_count_" + data.idx).innerHTML = data.current_pf_count;
-  document.getElementById("current_speed_" + data.idx).innerHTML = data.current_speed;
-  document.getElementById("download_time_" + data.idx).innerHTML = data.download_time;
-  //document.getElementById("log").innerHTML += str + '\r\n';
-  document.getElementById("detail_" + data.idx).innerHTML = get_detail(data);
-}
+$("body").on('click', '#stop_btn', function(e){
+  e.stopPropagation();
+  e.preventDefault();
+  globalSendCommand('stop', $(this).data('idx'), null, null, null, function(ret){
+    console.log(ret)
+    refresh_item(ret.data);
+  });
+});
+
 
 </script>    
 {% endblock %}

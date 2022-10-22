@@ -6,12 +6,18 @@ import subprocess
 import time
 import traceback
 
-from support import get_logger
+from support import SupportSubprocess, get_logger
 
 logger = get_logger()
 
 
 bin_dir = os.path.join(os.path.dirname(__file__), 'bin', platform.system())
+
+if platform.system() == 'Linux':
+    if (platform.platform().find('86') == -1 and platform.platform().find('64') == -1) or platform.platform().find('arch') != -1 or platform.platform().find('arm') != -1:
+        bin_dir = os.path.join(os.path.dirname(__file__), 'bin', 'LinuxArm')
+
+
 ARIA2C = os.path.join(bin_dir, 'aria2c' + ('.exe' if platform.system() == 'Windows' else ''))
 FFMPEG = os.path.join(bin_dir, 'ffmpeg' + ('.exe' if platform.system() == 'Windows' else ''))
 MP4DUMP = os.path.join(bin_dir, 'mp4dump' + ('.exe' if platform.system() == 'Windows' else ''))
