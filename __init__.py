@@ -34,8 +34,3 @@ else:
     WVDownloader = SupportSC.load_module_f(__file__, 'downloader').WVDownloader
 from .manager import WVDecryptManager
 from .tool import WVTool
-
-"""
-python -m flaskfarm.cli.code_encode --source C:\work\FlaskFarm\data\LOADING2\wv_tool\lib\pywidevine\cdm
-python -m flaskfarm.cli.code_encode --source C:\work\FlaskFarm\data\LOADING2\wv_tool\downloader.py
-"""
