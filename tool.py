@@ -34,7 +34,7 @@ if platform.system() != 'Windows':
 class WVTool(object):
 
     @classmethod
-    def aria2c_download(cls, url, filepath, headers=None, segment=True):
+    def aria2c_download(cls, url, filepath, headers=None, segment=True, retry_segment=True):
         try:
             if os.path.exists(filepath+'.aria2'):
                 try:
@@ -68,7 +68,7 @@ class WVTool(object):
             else:
                 #logger.warning(' '.join(command))
                 ret = ToolSubprocess.execute_command_return(command, timeout=10)
-                logger.debug(ret)
+                #logger.debug(ret)
                 if ret == 'timeout':
                     try:
                         if os.path.exists(filepath):
@@ -79,6 +79,17 @@ class WVTool(object):
                         logger.error('Exception:%s', exception)
                         logger.error(traceback.format_exc()) 
                     return cls.aria2c_download(url, filepath, headers=headers)
+                else:
+                    if os.path.exists(filepath):
+                        logger.debug(filepath)
+                        return True
+                    else:
+                        logger.error(ret)
+                        if retry_segment:
+                            time.sleep(5)
+                            return cls.aria2c_download(url, filepath, headers=headers, retry_segment=False)
+                        
+
             return os.path.exists(filepath)
         except Exception as exception: 
             logger.error('Exception:%s', exception)
