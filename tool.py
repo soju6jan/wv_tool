@@ -92,7 +92,7 @@ class WVTool(object):
                             time.sleep(5)
                             return cls.aria2c_download(url, filepath, headers=headers, retry_segment=False)
                         else:
-                            logger.error(os.path.exists(filepath))
+                            logger.info(f"{os.path.exists(filepath)}")
             if os.path.exists(filepath) == False:
                 logger.error("ERROR")
             return os.path.exists(filepath)
