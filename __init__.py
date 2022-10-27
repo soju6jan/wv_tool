@@ -26,7 +26,7 @@ except:
 
 DEFINE_DEV = False
 
-if DEFINE_DEV:
+if DEFINE_DEV and os.path.exists(os.path.join(os.path.dirname(__file__), 'downloader.py')):
     from .downloader import WVDownloader
 else:
     from support import SupportSC

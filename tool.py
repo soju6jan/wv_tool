@@ -84,12 +84,17 @@ class WVTool(object):
                         logger.debug(filepath)
                         return True
                     else:
+                        time.sleep(2)
+                        if os.path.exists(filepath):
+                            return True
                         logger.error(ret)
                         if retry_segment:
                             time.sleep(5)
                             return cls.aria2c_download(url, filepath, headers=headers, retry_segment=False)
-                        
-
+                        else:
+                            logger.error(os.path.exists(filepath))
+            if os.path.exists(filepath) == False:
+                logger.error("ERROR")
             return os.path.exists(filepath)
         except Exception as exception: 
             logger.error('Exception:%s', exception)
