@@ -24,7 +24,7 @@ except:
     pass        
 
 
-DEFINE_DEV = True
+DEFINE_DEV = False
 
 if DEFINE_DEV:
     from .downloader import WVDownloader
