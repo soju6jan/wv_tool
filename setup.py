@@ -2,7 +2,7 @@ setting = {
     'filepath' : __file__,
     'use_db': False,
     'use_default_setting': False,
-    'home_module': 'download',
+    'home_module': None,
     'menu': {
         'uri': __package__,
         'name': 'DRM 다운로드',
