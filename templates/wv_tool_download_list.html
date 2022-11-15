@@ -32,9 +32,6 @@ $(document).ready(function(){
   });
 
   socket.on('add', function(data){
-    console.log('111111111111111')
-    console.log(current_data)
-    console.log('22222222222222222')
     str = make_item(data);
     if (current_data == null || current_data.length == 0) {
       current_data = Array();
@@ -52,7 +49,6 @@ $(document).ready(function(){
 
   globalSendCommand('list', null, null, null, function(data) {
     $("#list").html('');
-    //console.log(data)
     current_data = data;
     if (data.length == 0) {
       str = "<tr><td colspan='10'><h4>작업이 없습니다.</h4><td><tr>";
@@ -81,7 +77,6 @@ function refresh_item(data) {
 }
 
 function make_item(data) {
-  console.log(data);
   str = '<tr id="tr1_'+data.idx+'" style="cursor: pointer;" data-toggle="collapse" data-target="#collapse_'+ data.idx + '" aria-expanded="true" >';
   str += make_item1(data);
   str += '</tr>';
@@ -143,7 +138,6 @@ $("body").on('click', '#stop_btn', function(e){
   e.stopPropagation();
   e.preventDefault();
   globalSendCommand('stop', $(this).data('idx'), null, null, function(ret){
-    console.log(ret)
     refresh_item(ret.data);
   });
 });
