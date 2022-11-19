@@ -75,8 +75,8 @@ class WVTool(object):
                             os.remove(filepath)
                         if os.path.exists(filepath+'.aria2'):
                             os.remove(filepath+'.aria2')
-                    except Exception as exception: 
-                        logger.error('Exception:%s', exception)
+                    except Exception as e: 
+                        logger.error(f"Exception:{str(e)}")
                         logger.error(traceback.format_exc()) 
                     return cls.aria2c_download(url, filepath, headers=headers)
                 else:
@@ -96,8 +96,8 @@ class WVTool(object):
             if os.path.exists(filepath) == False:
                 logger.error("ERROR")
             return os.path.exists(filepath)
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc()) 
         return False
 
@@ -108,8 +108,8 @@ class WVTool(object):
                 return
             command = [MP4DUMP, source, '>', target]
             os.system(' '.join(command))
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc()) 
     
     @classmethod
@@ -119,8 +119,8 @@ class WVTool(object):
                 return
             command = [MP4INFO, '--format', 'json', source, '>', target]
             os.system(' '.join(command))
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as exceptieon: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc()) 
 
     @classmethod
@@ -130,8 +130,8 @@ class WVTool(object):
                 return
             command = [MP4DECRYPT, '--key', '%s:%s' % (kid, key), source, target]
             os.system(' '.join(command))
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc()) 
     
 
@@ -140,8 +140,8 @@ class WVTool(object):
         try:
             command = [MKVMERGE] + option
             os.system(' '.join(command))
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc()) 
 
 
@@ -153,8 +153,8 @@ class WVTool(object):
             ofp = codecs.open(filename, 'w', encoding='utf8')
             ofp.write(data)
             ofp.close()
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc()) 
 
     @classmethod
@@ -164,8 +164,8 @@ class WVTool(object):
             data = ifp.read()
             ifp.close()
             return data
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc())
 
 
@@ -177,8 +177,8 @@ class WVTool(object):
                 os.makedirs(os.path.dirname(filepath))
             with open(filepath, "w", encoding='utf8') as json_file:
                 json.dump(data, json_file, indent=4, ensure_ascii=False)
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc()) 
     
     @classmethod
@@ -187,8 +187,8 @@ class WVTool(object):
             with open(filepath, "r", encoding='utf8') as json_file:
                 data = json.load(json_file)
                 return data
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc()) 
 
 
@@ -201,8 +201,8 @@ class WVTool(object):
             ttml = Ttml2Srt(source)
             ttml.write2file(target)
 
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc()) 
 
 
@@ -214,8 +214,8 @@ class WVTool(object):
             command = [FFMPEG, '-y', '-i', source,  target]
             logger.warning(' '.join(command))
             os.system(' '.join(command))
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc())
 
     @classmethod
@@ -225,8 +225,8 @@ class WVTool(object):
                 return
             command = [FFMPEG, '-y', '-i', source, '-c', 'copy', target]
             os.system(' '.join(command))
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc())
 
     
@@ -250,8 +250,8 @@ class WVTool(object):
                 else:
                     cmd = f"cat {init_filepath} $(ls -vx {segment}) > {target}"
                     os.system(cmd)
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc())
 
 
@@ -260,8 +260,8 @@ class WVTool(object):
         try:
             command = [FFMPEG] + command
             os.system(' '.join(command))
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc())
 
 
@@ -306,7 +306,7 @@ class ToolSubprocess(object):
                 except:
                     ret2 = None
             return ret2
-        except Exception as exception: 
-            logger.error('Exception:%s', exception)
+        except Exception as e: 
+            logger.error(f"Exception:{str(e)}")
             logger.error(traceback.format_exc())
             logger.error('command : %s', command)
