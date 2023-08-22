@@ -19,9 +19,7 @@ except:
 try:
     folder = None
     if platform.machine() == 'aarch64':
-        '''
-        arm64 환경일 경우 실행권한 부여
-        '''
+        # arm64 환경일 경우 실행권한 부여
         folder = 'LinuxArm'
     elif platform.system() == 'Linux':
         folder = 'Linux'
@@ -49,35 +47,56 @@ else:
 import functools
 import re
 from urllib.parse import urlparse
+from unittest.mock import patch
 
-def hook_request(f):
-    @functools.wraps(f)
-    def wrap(*args, **kwargs):
-        response = f(*args, **kwargs)
-        url = urlparse(args[0])
-        match = re.search(r'wavve\.com', url.netloc)
-        if match and response.text.startswith('<?xml'):
-            '''
-            xml 내용 중에 escape 처리되지 않은 ampersand가 있을 경우 처리
-            '''
-            response._content = bytes(
-                re.sub(r'&(?!#38;)', '&#38;', response.text),
-                response.encoding if response.encoding else 'utf-8')
-        return response
-    return wrap
-downloader.requests.get = hook_request(downloader.requests.get)
+import requests
 
-def hook_start(f):
+from framework.init_main import Framework
+from .setup import P as PLUGIN
+
+F = Framework.get_instance()
+
+
+def start_wrapper(f):
     @functools.wraps(f)
     def wrap(*args, **kwargs):
         self = args[0]
         mpd_url = urlparse(self.mpd_url)
         match = re.search(r'wavve\.com', mpd_url.netloc)
         if match and 'Host' in self.mpd_headers:
-            '''
-            요청 주소와 헤더의 Host 주소가 다를 경우 수정
-            '''
+            # 요청 주소와 헤더의 Host 주소가 다를 경우 수정
             self.mpd_headers['Host'] = mpd_url.netloc
         return f(*args, **kwargs)
     return wrap
-WVDownloader.start = hook_start(WVDownloader.start)
+WVDownloader.start = start_wrapper(WVDownloader.start)
+
+
+def patch_wavve_requests(f, mod: str):
+    '''
+    by ssokka
+        2023.08.21 웨이브 Proxy 패치
+        2023.08.22 코드 정리
+    '''
+    def req(*args, f=getattr(requests, mod), **kwargs):
+        support_site = F.PluginManager.get_plugin_instance('support_site')
+        use_proxy = support_site.ModelSetting.get_bool('site_wavve_use_proxy')
+        proxy_url = support_site.ModelSetting.get('site_wavve_proxy_url')
+        proxies = {'http': None, 'https': None}
+        if use_proxy and proxy_url:
+            proxies['http'] = proxy_url
+            proxies['https'] = proxy_url
+        PLUGIN.logger.debug(f'{f.__name__}, requests.{mod}, {proxies}')
+        response = f(*args, proxies=proxies, **kwargs)
+        if response.text.startswith('<?xml'):
+            # xml 내용 중에 escape 처리되지 않은 ampersand가 있을 경우 처리
+            response._content = bytes(
+                re.sub(r'&(?!#38;)', '&#38;', response.text),
+                response.encoding if response.encoding else 'utf-8')
+        return response
+    @functools.wraps(f)
+    @patch(f'requests.{mod}', req)
+    def wrap(*args, **kwargs):
+        return f(*args, **kwargs)
+    return wrap
+WVDownloader.get_mpd = patch_wavve_requests(WVDownloader.get_mpd, 'get')
+WVDownloader.do_make_key = patch_wavve_requests(WVDownloader.do_make_key, 'post')
