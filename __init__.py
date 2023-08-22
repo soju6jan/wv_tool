@@ -77,6 +77,7 @@ def patch_wavve_requests(f, mod: str):
         2023.08.21 웨이브 Proxy 패치
         2023.08.22 코드 정리
     '''
+    f_name = f.__name__
     def req(*args, f=getattr(requests, mod), **kwargs):
         support_site = F.PluginManager.get_plugin_instance('support_site')
         use_proxy = support_site.ModelSetting.get_bool('site_wavve_use_proxy')
@@ -85,7 +86,7 @@ def patch_wavve_requests(f, mod: str):
         if use_proxy and proxy_url:
             proxies['http'] = proxy_url
             proxies['https'] = proxy_url
-        PLUGIN.logger.debug(f'{f.__name__}, requests.{mod}, {proxies}')
+        PLUGIN.logger.debug(f'{f_name}, requests.{mod}, {proxies}')
         response = f(*args, proxies=proxies, **kwargs)
         if response.text.startswith('<?xml'):
             # xml 내용 중에 escape 처리되지 않은 ampersand가 있을 경우 처리
