@@ -39,12 +39,12 @@ class ModuleDownload(PluginModuleBase):
         refresh_type = 'refresh'
         if args['status'] == "READY":
             data = {'type':'info', 'msg' : f"{args['data']['output_filename']} 다운로드를 시작합니다.", 'url':'/wv_tool/download/list'}
-            socketio.emit("notify", data, namespace='/framework', broadcast=True)
-            refresh_type = 'add'  
+            socketio.emit("notify", data, namespace='/framework')
+            refresh_type = 'add'
         elif args['status'] == "EXIST_OUTPUT_FILEPATH":
             data = {'type':'warning', 'msg' : f"{args['data']['output_filename']} 파일이 있습니다.",  'url':'/wv_tool/download/list'}
-            socketio.emit("notify", data, namespace='/framework', broadcast=True)
+            socketio.emit("notify", data, namespace='/framework')
         elif args['status'] == "COMPLETED":
             data = {'type':'info', 'msg' : f"{args['data']['output_filename']} 다운로드 완료",  'url':'/wv_tool/download/list'}
-            socketio.emit("notify", data, namespace='/framework', broadcast=True)
+            socketio.emit("notify", data, namespace='/framework')
         self.socketio_callback(refresh_type, args['data'])
